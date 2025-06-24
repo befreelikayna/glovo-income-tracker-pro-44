@@ -42,9 +42,10 @@ const WeeklySummary = () => {
     
     if (!settings) return { weekStart, weekEnd, totalIncome, dailyEarnings, calculations: null };
 
-    const rentDeduction = settings.rent / 4;
-    const motorcycleDeduction = settings.motorcycle / 4;
-    const taxDeduction = settings.tax / 4;
+    // Calculate weekly deductions from monthly settings
+    const rentDeduction = settings.rent / 4.33; // Average weeks per month
+    const motorcycleDeduction = settings.motorcycle / 4.33;
+    const taxDeduction = settings.tax / 4.33;
     const woltFee = totalIncome * (settings.wolt_rate / 100);
     const netIncome = totalIncome - rentDeduction - motorcycleDeduction - taxDeduction - woltFee;
 
@@ -171,7 +172,7 @@ const WeeklySummary = () => {
             </div>
           </Card>
 
-          {currentWeek.calculations && (
+          {currentWeek.calculations && settings && (
             <>
               <Card className="p-4 bg-white/80 backdrop-blur border-0">
                 <div className="flex justify-between items-center">
@@ -196,7 +197,7 @@ const WeeklySummary = () => {
 
               <Card className="p-4 bg-white/80 backdrop-blur border-0">
                 <div className="flex justify-between items-center">
-                  <span className="font-medium text-glovo-dark">Wolt Fee ({settings?.wolt_rate}%)</span>
+                  <span className="font-medium text-glovo-dark">Wolt Fee ({settings.wolt_rate}%)</span>
                   <span className="text-red-600 font-semibold">-{currentWeek.calculations.woltFee.toFixed(2)} RON</span>
                 </div>
               </Card>
