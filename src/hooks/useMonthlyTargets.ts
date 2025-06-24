@@ -73,6 +73,16 @@ export const useMonthlyTargets = () => {
     }
   };
 
+  const getCurrentTarget = () => {
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1; // getMonth() returns 0-11
+    const currentYear = now.getFullYear();
+    
+    return targets.find(target => 
+      target.month === currentMonth && target.year === currentYear
+    );
+  };
+
   useEffect(() => {
     fetchTargets();
   }, []);
@@ -81,6 +91,7 @@ export const useMonthlyTargets = () => {
     targets,
     loading,
     setTarget,
+    getCurrentTarget,
     refetch: fetchTargets
   };
 };
