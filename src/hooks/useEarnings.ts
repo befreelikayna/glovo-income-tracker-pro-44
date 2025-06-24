@@ -20,12 +20,18 @@ export const useEarnings = () => {
 
   const fetchEarnings = async () => {
     try {
+      console.log('Fetching earnings...');
       const { data, error } = await supabase
         .from('earnings')
         .select('*')
         .order('date', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Earnings fetched successfully:', data?.length || 0);
       setEarnings(data || []);
     } catch (error) {
       console.error('Error fetching earnings:', error);
@@ -41,6 +47,7 @@ export const useEarnings = () => {
 
   const addEarning = async (dailyAmount: number, cashAmount: number) => {
     try {
+      console.log('Adding earning:', { dailyAmount, cashAmount });
       const today = new Date().toISOString().split('T')[0];
       
       const { data, error } = await supabase
@@ -55,6 +62,7 @@ export const useEarnings = () => {
 
       if (error) {
         if (error.code === '23505') { // Unique constraint violation
+          console.log('Updating existing record for today');
           // Update existing record for today
           const { data: updateData, error: updateError } = await supabase
             .from('earnings')
@@ -99,6 +107,7 @@ export const useEarnings = () => {
 
   const deleteEarning = async (earningId: string) => {
     try {
+      console.log('Deleting earning:', earningId);
       const { error } = await supabase
         .from('earnings')
         .delete()
@@ -122,6 +131,7 @@ export const useEarnings = () => {
   };
 
   useEffect(() => {
+    console.log('useEarnings hook initialized');
     fetchEarnings();
   }, []);
 
