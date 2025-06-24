@@ -3,11 +3,13 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import { Link } from "react-router-dom";
 import NavigationBar from "@/components/NavigationBar";
 import { useSettings } from "@/hooks/useSettings";
 import { useMonthlyTargets } from "@/hooks/useMonthlyTargets";
+import EarningsManager from "@/components/EarningsManager";
 
 const AdminPanel = () => {
   const { settings, loading, updateSettings } = useSettings();
@@ -69,100 +71,111 @@ const AdminPanel = () => {
         
         <h1 className="text-2xl font-bold text-white mb-8">Admin Panel</h1>
 
-        <div className="space-y-4">
-          <Card className="p-4 bg-white border-0">
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-glovo-dark">Rent</span>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  value={localSettings.rent}
-                  onChange={(e) => handleInputChange('rent', e.target.value)}
-                  className="w-20 text-right border-0 bg-gray-100"
-                />
-                <span className="text-sm text-gray-600">RON</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4 bg-white border-0">
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-glovo-dark">Motorcycle</span>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  value={localSettings.motorcycle}
-                  onChange={(e) => handleInputChange('motorcycle', e.target.value)}
-                  className="w-20 text-right border-0 bg-gray-100"
-                />
-                <span className="text-sm text-gray-600">RON</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4 bg-white border-0">
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-glovo-dark">Tax</span>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  value={localSettings.tax}
-                  onChange={(e) => handleInputChange('tax', e.target.value)}
-                  className="w-20 text-right border-0 bg-gray-100"
-                />
-                <span className="text-sm text-gray-600">RON</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4 bg-white border-0">
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-glovo-dark">Wolt fee %</span>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  value={localSettings.wolt_rate}
-                  onChange={(e) => handleInputChange('wolt_rate', e.target.value)}
-                  className="w-20 text-right border-0 bg-gray-100"
-                />
-                <span className="text-sm text-gray-600">%</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4 bg-white border-0">
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-glovo-dark">Monthly Target</span>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  value={monthlyTarget}
-                  onChange={(e) => setMonthlyTarget(e.target.value)}
-                  placeholder="3000"
-                  className="w-20 text-right border-0 bg-gray-100"
-                />
-                <span className="text-sm text-gray-600">RON</span>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        <div className="space-y-3 mt-6">
-          <Button 
-            onClick={handleSave}
-            className="w-full bg-glovo-green text-white font-bold py-4 text-lg rounded-2xl hover:bg-glovo-green/90"
-          >
-            Save Settings
-          </Button>
+        <Tabs defaultValue="settings" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="earnings">Manage Earnings</TabsTrigger>
+          </TabsList>
           
-          <Button 
-            onClick={handleSetMonthlyTarget}
-            disabled={!monthlyTarget}
-            className="w-full bg-glovo-gold text-glovo-dark font-bold py-4 text-lg rounded-2xl hover:bg-glovo-gold/90"
-          >
-            Set Monthly Target
-          </Button>
-        </div>
+          <TabsContent value="settings" className="space-y-4">
+            <Card className="p-4 bg-white border-0">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-glovo-dark">Rent</span>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    value={localSettings.rent}
+                    onChange={(e) => handleInputChange('rent', e.target.value)}
+                    className="w-20 text-right border-0 bg-gray-100"
+                  />
+                  <span className="text-sm text-gray-600">RON</span>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-white border-0">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-glovo-dark">Motorcycle</span>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    value={localSettings.motorcycle}
+                    onChange={(e) => handleInputChange('motorcycle', e.target.value)}
+                    className="w-20 text-right border-0 bg-gray-100"
+                  />
+                  <span className="text-sm text-gray-600">RON</span>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-white border-0">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-glovo-dark">Tax</span>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    value={localSettings.tax}
+                    onChange={(e) => handleInputChange('tax', e.target.value)}
+                    className="w-20 text-right border-0 bg-gray-100"
+                  />
+                  <span className="text-sm text-gray-600">RON</span>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-white border-0">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-glovo-dark">Wolt fee %</span>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    value={localSettings.wolt_rate}
+                    onChange={(e) => handleInputChange('wolt_rate', e.target.value)}
+                    className="w-20 text-right border-0 bg-gray-100"
+                  />
+                  <span className="text-sm text-gray-600">%</span>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-white border-0">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-glovo-dark">Monthly Target</span>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    value={monthlyTarget}
+                    onChange={(e) => setMonthlyTarget(e.target.value)}
+                    placeholder="3000"
+                    className="w-20 text-right border-0 bg-gray-100"
+                  />
+                  <span className="text-sm text-gray-600">RON</span>
+                </div>
+              </div>
+            </Card>
+
+            <div className="space-y-3 mt-6">
+              <Button 
+                onClick={handleSave}
+                className="w-full bg-glovo-green text-white font-bold py-4 text-lg rounded-2xl hover:bg-glovo-green/90"
+              >
+                Save Settings
+              </Button>
+              
+              <Button 
+                onClick={handleSetMonthlyTarget}
+                disabled={!monthlyTarget}
+                className="w-full bg-glovo-gold text-glovo-dark font-bold py-4 text-lg rounded-2xl hover:bg-glovo-gold/90"
+              >
+                Set Monthly Target
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="earnings">
+            <EarningsManager />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <NavigationBar />

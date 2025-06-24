@@ -97,6 +97,30 @@ export const useEarnings = () => {
     }
   };
 
+  const deleteEarning = async (earningId: string) => {
+    try {
+      const { error } = await supabase
+        .from('earnings')
+        .delete()
+        .eq('id', earningId);
+
+      if (error) throw error;
+      
+      setEarnings(prev => prev.filter(earning => earning.id !== earningId));
+      toast({
+        title: "Success",
+        description: "Earning deleted successfully!",
+      });
+    } catch (error) {
+      console.error('Error deleting earning:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete earning",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     fetchEarnings();
   }, []);
@@ -105,6 +129,7 @@ export const useEarnings = () => {
     earnings,
     loading,
     addEarning,
+    deleteEarning,
     refetch: fetchEarnings
   };
 };
