@@ -15,9 +15,9 @@ const AdminPanel = () => {
   const { settings, loading, updateSettings } = useSettings();
   const { setTarget } = useMonthlyTargets();
   const [localSettings, setLocalSettings] = useState({
-    rent: 400,
-    motorcycle: 150,
-    tax: 425,
+    rent: 779.4,
+    motorcycle: 1082.5,
+    tax: 1840.25,
     wolt_rate: 10,
   });
   const [monthlyTarget, setMonthlyTarget] = useState("");
@@ -80,7 +80,10 @@ const AdminPanel = () => {
           <TabsContent value="settings" className="space-y-4">
             <Card className="p-4 bg-white border-0">
               <div className="flex justify-between items-center">
-                <span className="font-medium text-glovo-dark">Rent</span>
+                <div>
+                  <span className="font-medium text-glovo-dark">Rent (Monthly)</span>
+                  <p className="text-sm text-gray-500">Weekly: {(localSettings.rent / 4.33).toFixed(2)} RON</p>
+                </div>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
@@ -95,7 +98,10 @@ const AdminPanel = () => {
 
             <Card className="p-4 bg-white border-0">
               <div className="flex justify-between items-center">
-                <span className="font-medium text-glovo-dark">Motorcycle</span>
+                <div>
+                  <span className="font-medium text-glovo-dark">Motorcycle (Monthly)</span>
+                  <p className="text-sm text-gray-500">Weekly: {(localSettings.motorcycle / 4.33).toFixed(2)} RON</p>
+                </div>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
@@ -110,7 +116,10 @@ const AdminPanel = () => {
 
             <Card className="p-4 bg-white border-0">
               <div className="flex justify-between items-center">
-                <span className="font-medium text-glovo-dark">Tax</span>
+                <div>
+                  <span className="font-medium text-glovo-dark">Tax (Monthly)</span>
+                  <p className="text-sm text-gray-500">Weekly: {(localSettings.tax / 4.33).toFixed(2)} RON</p>
+                </div>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
