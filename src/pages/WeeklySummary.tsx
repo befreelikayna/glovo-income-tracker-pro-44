@@ -6,9 +6,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import { Link } from "react-router-dom";
 import NavigationBar from "@/components/NavigationBar";
+import { useEarnings } from "@/hooks/useEarnings";
+import { useSettings } from "@/hooks/useSettings";
+import { useHistoricalSummaries } from "@/hooks/useHistoricalSummaries";
+import { useMonthlyTargets } from "@/hooks/useMonthlyTargets";
 
 const WeeklySummary = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState("1week");
+  const [selectedPeriod, setSelectedPeriod] = useState("week");
+  const { earnings, loading: earningsLoading } = useEarnings();
+  const { settings, loading: settingsLoading } = useSettings();
+  const { summaries, saveSummary } = useHistoricalSummaries();
+  const { targets } = useMonthlyTargets();
   const [calculatedData, setCalculatedData] = useState({
     totalIncome: 0,
     deductions: {
@@ -20,77 +28,90 @@ const WeeklySummary = () => {
     netIncome: 0,
     dailyEarnings: Array(7).fill(0),
   });
-  const [historicData, setHistoricData] = useState<any[]>([]);
 
   const periodOptions = [
-    { value: "1week", label: "1 Week", multiplier: 1 },
-    { value: "2week", label: "2 Weeks", multiplier: 2 },
-    { value: "3week", label: "3 Weeks", multiplier: 3 },
-    { value: "4week", label: "4 Weeks", multiplier: 4 },
-    { value: "1month", label: "1 Month", multiplier: 4.33 },
+    { value: "week", label: "1 Week", multiplier: 1 },
+    { value: "2weeks", label: "2 Weeks", multiplier: 2 },
+    { value: "3weeks", label: "3 Weeks", multiplier: 3 },
+    { value: "4weeks", label: "4 Weeks", multiplier: 4 },
+    { value: "month", label: "1 Month", multiplier: 4.33 },
   ];
 
   useEffect(() => {
-    calculatePeriodSummary();
-    loadHistoricData();
-  }, [selectedPeriod]);
+    if (earnings.length > 0 && settings) {
+      calculatePeriodSummary();
+    }
+  }, [selectedPeriod, earnings, settings]);
 
   const calculatePeriodSummary = () => {
-    const earnings = JSON.parse(localStorage.getItem("earnings") || "[]");
-    const settings = JSON.parse(localStorage.getItem("adminSettings") || '{"rent": 400, "motorcycle": 150, "tax": 425, "woltRate": 10}');
+    if (!settings) return;
     
     const selectedOption = periodOptions.find(p => p.value === selectedPeriod);
     const multiplier = selectedOption?.multiplier || 1;
     
-    if (earnings.length > 0) {
-      const totalIncome = earnings.reduce((sum: number, earning: any) => sum + earning.daily + earning.cash, 0);
-      const scaledIncome = totalIncome * multiplier;
-      const woltFee = (scaledIncome * settings.woltRate) / 100;
-      const totalDeductions = (settings.rent + settings.motorcycle + settings.tax) * multiplier + woltFee;
-      const netIncome = scaledIncome - totalDeductions;
+    const totalIncome = earnings.reduce((sum, earning) => sum + earning.total_amount, 0);
+    const scaledIncome = totalIncome * multiplier;
+    const woltFee = (scaledIncome * settings.wolt_rate) / 100;
+    const totalDeductions = (settings.rent + settings.motorcycle + settings.tax) * multiplier + woltFee;
+    const netIncome = scaledIncome - totalDeductions;
 
-      // Get last 7 days for chart display
-      const last7Days = earnings.slice(-7).map((earning: any) => earning.daily + earning.cash);
-      while (last7Days.length < 7) {
-        last7Days.unshift(0);
-      }
-
-      setCalculatedData({
-        totalIncome: scaledIncome,
-        deductions: {
-          rent: settings.rent * multiplier,
-          motorcycle: settings.motorcycle * multiplier,
-          tax: settings.tax * multiplier,
-          woltFee,
-        },
-        netIncome,
-        dailyEarnings: last7Days,
-      });
+    // Get last 7 days for chart display
+    const last7Days = earnings.slice(0, 7).map(earning => earning.total_amount);
+    while (last7Days.length < 7) {
+      last7Days.unshift(0);
     }
+
+    setCalculatedData({
+      totalIncome: scaledIncome,
+      deductions: {
+        rent: settings.rent * multiplier,
+        motorcycle: settings.motorcycle * multiplier,
+        tax: settings.tax * multiplier,
+        woltFee,
+      },
+      netIncome,
+      dailyEarnings: last7Days.reverse(),
+    });
   };
 
-  const loadHistoricData = () => {
-    const historic = JSON.parse(localStorage.getItem("historicData") || "[]");
-    setHistoricData(historic);
-  };
-
-  const saveToHistory = () => {
-    const newRecord = {
-      period: selectedPeriod,
-      periodLabel: periodOptions.find(p => p.value === selectedPeriod)?.label,
-      date: new Date().toISOString(),
-      ...calculatedData,
-    };
-
-    const existingHistoric = JSON.parse(localStorage.getItem("historicData") || "[]");
-    existingHistoric.push(newRecord);
-    localStorage.setItem("historicData", JSON.stringify(existingHistoric));
+  const saveToHistory = async () => {
+    if (!settings) return;
     
-    setHistoricData(existingHistoric);
+    const selectedOption = periodOptions.find(p => p.value === selectedPeriod);
+    if (!selectedOption) return;
+
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - 7);
+
+    await saveSummary({
+      period_type: selectedPeriod,
+      period_label: selectedOption.label,
+      start_date: startDate.toISOString().split('T')[0],
+      end_date: today.toISOString().split('T')[0],
+      total_income: calculatedData.totalIncome,
+      rent_deduction: calculatedData.deductions.rent,
+      motorcycle_deduction: calculatedData.deductions.motorcycle,
+      tax_deduction: calculatedData.deductions.tax,
+      wolt_fee: calculatedData.deductions.woltFee,
+      net_income: calculatedData.netIncome,
+    });
+  };
+
+  const getCurrentMonthTarget = () => {
+    const now = new Date();
+    return targets.find(t => t.month === now.getMonth() + 1 && t.year === now.getFullYear());
   };
 
   const days = ['Mon', 'Tu', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const maxEarning = Math.max(...calculatedData.dailyEarnings);
+  const currentTarget = getCurrentMonthTarget();
+
+  if (earningsLoading || settingsLoading) {
+    return <div className="min-h-screen bg-glovo-light flex items-center justify-center">
+      <div className="text-glovo-dark">Loading...</div>
+    </div>;
+  }
 
   return (
     <div className="min-h-screen bg-glovo-light">
@@ -123,6 +144,19 @@ const WeeklySummary = () => {
             </SelectContent>
           </Select>
         </div>
+
+        {/* Monthly Target Display */}
+        {currentTarget && (
+          <Card className="p-4 bg-blue-50 border-0 mb-4">
+            <div className="text-center">
+              <p className="text-sm text-blue-600 mb-1">Monthly Target</p>
+              <p className="text-2xl font-bold text-blue-800">{currentTarget.target_amount.toFixed(0)} RON</p>
+              <p className="text-sm text-blue-600">
+                Progress: {((calculatedData.netIncome / currentTarget.target_amount) * 100).toFixed(1)}%
+              </p>
+            </div>
+          </Card>
+        )}
 
         <Card className="p-4 bg-gray-50 border-0 mb-4">
           <div className="text-center">
@@ -183,18 +217,18 @@ const WeeklySummary = () => {
         </Button>
 
         {/* Historic Data */}
-        {historicData.length > 0 && (
+        {summaries.length > 0 && (
           <div className="mt-6">
             <h3 className="text-lg font-bold text-glovo-dark mb-4">Historic Data</h3>
             <div className="space-y-2 max-h-40 overflow-y-auto">
-              {historicData.slice(-5).reverse().map((record, index) => (
-                <Card key={index} className="p-3 bg-gray-50 border-0">
+              {summaries.slice(0, 5).map((record) => (
+                <Card key={record.id} className="p-3 bg-gray-50 border-0">
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="font-semibold text-glovo-dark">{record.periodLabel}</p>
-                      <p className="text-xs text-gray-600">{new Date(record.date).toLocaleDateString()}</p>
+                      <p className="font-semibold text-glovo-dark">{record.period_label}</p>
+                      <p className="text-xs text-gray-600">{new Date(record.created_at).toLocaleDateString()}</p>
                     </div>
-                    <p className="font-bold text-glovo-dark">{record.netIncome.toFixed(0)} RON</p>
+                    <p className="font-bold text-glovo-dark">{record.net_income.toFixed(0)} RON</p>
                   </div>
                 </Card>
               ))}

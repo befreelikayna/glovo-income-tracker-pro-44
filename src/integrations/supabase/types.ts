@@ -9,7 +9,138 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      earnings: {
+        Row: {
+          cash_amount: number
+          created_at: string
+          daily_amount: number
+          date: string
+          id: string
+          total_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          cash_amount?: number
+          created_at?: string
+          daily_amount?: number
+          date: string
+          id?: string
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          cash_amount?: number
+          created_at?: string
+          daily_amount?: number
+          date?: string
+          id?: string
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      historical_summaries: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          motorcycle_deduction: number
+          net_income: number
+          period_label: string
+          period_type: string
+          rent_deduction: number
+          start_date: string
+          tax_deduction: number
+          total_income: number
+          wolt_fee: number
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          motorcycle_deduction: number
+          net_income: number
+          period_label: string
+          period_type: string
+          rent_deduction: number
+          start_date: string
+          tax_deduction: number
+          total_income: number
+          wolt_fee: number
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          motorcycle_deduction?: number
+          net_income?: number
+          period_label?: string
+          period_type?: string
+          rent_deduction?: number
+          start_date?: string
+          tax_deduction?: number
+          total_income?: number
+          wolt_fee?: number
+        }
+        Relationships: []
+      }
+      monthly_targets: {
+        Row: {
+          created_at: string
+          id: string
+          month: number
+          target_amount: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          month: number
+          target_amount: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          month?: number
+          target_amount?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          created_at: string
+          id: string
+          motorcycle: number
+          rent: number
+          tax: number
+          updated_at: string
+          wolt_rate: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          motorcycle?: number
+          rent?: number
+          tax?: number
+          updated_at?: string
+          wolt_rate?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          motorcycle?: number
+          rent?: number
+          tax?: number
+          updated_at?: string
+          wolt_rate?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,43 +1,26 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, MoreVertical, Home, BarChart3, Settings, DollarSign } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, MoreVertical } from "lucide-react";
 import NavigationBar from "@/components/NavigationBar";
+import { useEarnings } from "@/hooks/useEarnings";
 
 const Index = () => {
   const [dailyEarnings, setDailyEarnings] = useState("");
   const [cashEarnings, setCashEarnings] = useState("");
-  const { toast } = useToast();
+  const { addEarning } = useEarnings();
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!dailyEarnings) {
-      toast({
-        title: "Error",
-        description: "Please enter daily earnings amount",
-        variant: "destructive",
-      });
       return;
     }
 
-    // Save to localStorage (in a real app, this would be saved to a database)
-    const earnings = {
-      daily: parseFloat(dailyEarnings),
-      cash: parseFloat(cashEarnings) || 0,
-      date: new Date().toISOString(),
-    };
-
-    const existingEarnings = JSON.parse(localStorage.getItem("earnings") || "[]");
-    existingEarnings.push(earnings);
-    localStorage.setItem("earnings", JSON.stringify(existingEarnings));
-
-    toast({
-      title: "Success",
-      description: "Daily earnings saved successfully!",
-    });
+    await addEarning(
+      parseFloat(dailyEarnings),
+      parseFloat(cashEarnings) || 0
+    );
 
     setDailyEarnings("");
     setCashEarnings("");

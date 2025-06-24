@@ -3,43 +3,58 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import NavigationBar from "@/components/NavigationBar";
+import { useSettings } from "@/hooks/useSettings";
+import { useMonthlyTargets } from "@/hooks/useMonthlyTargets";
 
 const AdminPanel = () => {
-  const [settings, setSettings] = useState({
+  const { settings, loading, updateSettings } = useSettings();
+  const { setTarget } = useMonthlyTargets();
+  const [localSettings, setLocalSettings] = useState({
     rent: 400,
     motorcycle: 150,
     tax: 425,
-    woltRate: 10,
+    wolt_rate: 10,
   });
-  const [currency, setCurrency] = useState("RON");
-  const { toast } = useToast();
+  const [monthlyTarget, setMonthlyTarget] = useState("");
 
   useEffect(() => {
-    const savedSettings = localStorage.getItem("adminSettings");
-    if (savedSettings) {
-      setSettings(JSON.parse(savedSettings));
+    if (settings) {
+      setLocalSettings({
+        rent: settings.rent,
+        motorcycle: settings.motorcycle,
+        tax: settings.tax,
+        wolt_rate: settings.wolt_rate,
+      });
     }
-  }, []);
+  }, [settings]);
 
-  const handleSave = () => {
-    localStorage.setItem("adminSettings", JSON.stringify(settings));
-    toast({
-      title: "Success",
-      description: "Settings saved successfully!",
-    });
+  const handleSave = async () => {
+    await updateSettings(localSettings);
   };
 
-  const handleInputChange = (field: keyof typeof settings, value: string) => {
-    setSettings(prev => ({
+  const handleSetMonthlyTarget = async () => {
+    if (monthlyTarget) {
+      const now = new Date();
+      await setTarget(now.getMonth() + 1, now.getFullYear(), parseFloat(monthlyTarget));
+      setMonthlyTarget("");
+    }
+  };
+
+  const handleInputChange = (field: keyof typeof localSettings, value: string) => {
+    setLocalSettings(prev => ({
       ...prev,
       [field]: parseFloat(value) || 0
     }));
   };
+
+  if (loading) {
+    return <div className="min-h-screen bg-glovo-dark flex items-center justify-center">
+      <div className="text-white">Loading...</div>
+    </div>;
+  }
 
   return (
     <div className="min-h-screen bg-glovo-dark">
@@ -61,7 +76,7 @@ const AdminPanel = () => {
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
-                  value={settings.rent}
+                  value={localSettings.rent}
                   onChange={(e) => handleInputChange('rent', e.target.value)}
                   className="w-20 text-right border-0 bg-gray-100"
                 />
@@ -76,7 +91,7 @@ const AdminPanel = () => {
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
-                  value={settings.motorcycle}
+                  value={localSettings.motorcycle}
                   onChange={(e) => handleInputChange('motorcycle', e.target.value)}
                   className="w-20 text-right border-0 bg-gray-100"
                 />
@@ -91,7 +106,7 @@ const AdminPanel = () => {
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
-                  value={settings.tax}
+                  value={localSettings.tax}
                   onChange={(e) => handleInputChange('tax', e.target.value)}
                   className="w-20 text-right border-0 bg-gray-100"
                 />
@@ -106,36 +121,48 @@ const AdminPanel = () => {
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
-                  value={settings.woltRate}
-                  onChange={(e) => handleInputChange('woltRate', e.target.value)}
+                  value={localSettings.wolt_rate}
+                  onChange={(e) => handleInputChange('wolt_rate', e.target.value)}
                   className="w-20 text-right border-0 bg-gray-100"
                 />
                 <span className="text-sm text-gray-600">%</span>
               </div>
             </div>
           </Card>
+
+          <Card className="p-4 bg-white border-0">
+            <div className="flex justify-between items-center">
+              <span className="font-medium text-glovo-dark">Monthly Target</span>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  value={monthlyTarget}
+                  onChange={(e) => setMonthlyTarget(e.target.value)}
+                  placeholder="3000"
+                  className="w-20 text-right border-0 bg-gray-100"
+                />
+                <span className="text-sm text-gray-600">RON</span>
+              </div>
+            </div>
+          </Card>
         </div>
 
-        <div className="mt-6">
-          <Select value={currency} onValueChange={setCurrency}>
-            <SelectTrigger className="bg-glovo-dark text-white border-gray-600">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="RON">RON</SelectItem>
-              <SelectItem value="USD">USD</SelectItem>
-              <SelectItem value="EUR">EUR</SelectItem>
-              <SelectItem value="MAD">MAD</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="space-y-3 mt-6">
+          <Button 
+            onClick={handleSave}
+            className="w-full bg-glovo-green text-white font-bold py-4 text-lg rounded-2xl hover:bg-glovo-green/90"
+          >
+            Save Settings
+          </Button>
+          
+          <Button 
+            onClick={handleSetMonthlyTarget}
+            disabled={!monthlyTarget}
+            className="w-full bg-glovo-gold text-glovo-dark font-bold py-4 text-lg rounded-2xl hover:bg-glovo-gold/90"
+          >
+            Set Monthly Target
+          </Button>
         </div>
-
-        <Button 
-          onClick={handleSave}
-          className="w-full mt-6 bg-glovo-green text-white font-bold py-4 text-lg rounded-2xl hover:bg-glovo-green/90"
-        >
-          Save Settings
-        </Button>
       </div>
 
       <NavigationBar />
