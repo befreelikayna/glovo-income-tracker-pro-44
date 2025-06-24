@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -40,19 +40,20 @@ const EarningsManager = () => {
     if (!dailyAmount || !selectedDate) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Please fill in date and daily amount",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      await addEarning(parseFloat(dailyAmount), parseFloat(cashAmount) || 0);
+      await addEarning(parseFloat(dailyAmount), parseFloat(cashAmount) || 0, selectedDate);
       setIsDialogOpen(false);
-      toast({
-        title: "Success",
-        description: editingEarning ? "Earning updated successfully!" : "Earning added successfully!",
-      });
+      // Reset form
+      setDailyAmount("");
+      setCashAmount("");
+      setSelectedDate("");
+      setEditingEarning(null);
     } catch (error) {
       console.error('Error saving earning:', error);
     }
@@ -90,7 +91,7 @@ const EarningsManager = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-glovo-dark mb-2">
-                  Date
+                  Date *
                 </label>
                 <Input
                   type="date"
@@ -155,7 +156,7 @@ const EarningsManager = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {earnings.slice(0, 10).map((earning) => (
+              {earnings.slice(0, 20).map((earning) => (
                 <TableRow key={earning.id}>
                   <TableCell className="font-medium">
                     {format(new Date(earning.date), 'MMM d, yyyy')}

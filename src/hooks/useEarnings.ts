@@ -45,15 +45,15 @@ export const useEarnings = () => {
     }
   };
 
-  const addEarning = async (dailyAmount: number, cashAmount: number) => {
+  const addEarning = async (dailyAmount: number, cashAmount: number, selectedDate?: string) => {
     try {
-      console.log('Adding earning:', { dailyAmount, cashAmount });
-      const today = new Date().toISOString().split('T')[0];
+      console.log('Adding earning:', { dailyAmount, cashAmount, selectedDate });
+      const targetDate = selectedDate || new Date().toISOString().split('T')[0];
       
       const { data, error } = await supabase
         .from('earnings')
         .insert({
-          date: today,
+          date: targetDate,
           daily_amount: dailyAmount,
           cash_amount: cashAmount
         })
@@ -62,8 +62,8 @@ export const useEarnings = () => {
 
       if (error) {
         if (error.code === '23505') { // Unique constraint violation
-          console.log('Updating existing record for today');
-          // Update existing record for today
+          console.log('Updating existing record for date:', targetDate);
+          // Update existing record for the date
           const { data: updateData, error: updateError } = await supabase
             .from('earnings')
             .update({
@@ -71,30 +71,33 @@ export const useEarnings = () => {
               cash_amount: cashAmount,
               updated_at: new Date().toISOString()
             })
-            .eq('date', today)
+            .eq('date', targetDate)
             .select()
             .single();
 
           if (updateError) throw updateError;
           
           setEarnings(prev => prev.map(earning => 
-            earning.date === today ? updateData : earning
+            earning.date === targetDate ? updateData : earning
           ));
           
           toast({
             title: "Success",
-            description: "Today's earnings updated successfully!",
+            description: `Earnings for ${targetDate} updated successfully!`,
           });
         } else {
           throw error;
         }
       } else {
-        setEarnings(prev => [data, ...prev]);
+        setEarnings(prev => [data, ...prev.filter(e => e.date !== targetDate)].sort((a, b) => b.date.localeCompare(a.date)));
         toast({
           title: "Success",
           description: "Earnings saved successfully!",
         });
       }
+      
+      // Refresh the data to ensure consistency
+      await fetchEarnings();
     } catch (error) {
       console.error('Error saving earnings:', error);
       toast({
