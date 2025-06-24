@@ -13,8 +13,8 @@ const AdminPanel = () => {
   const [settings, setSettings] = useState({
     rent: 400,
     motorcycle: 150,
-    taxRate: 10,
-    glovoRate: 10,
+    tax: 425,
+    woltRate: 10,
   });
   const [currency, setCurrency] = useState("RON");
   const { toast } = useToast();
@@ -87,27 +87,27 @@ const AdminPanel = () => {
 
           <Card className="p-4 bg-white border-0">
             <div className="flex justify-between items-center">
-              <span className="font-medium text-glovo-dark">Tax %</span>
+              <span className="font-medium text-glovo-dark">Tax</span>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
-                  value={settings.taxRate}
-                  onChange={(e) => handleInputChange('taxRate', e.target.value)}
+                  value={settings.tax}
+                  onChange={(e) => handleInputChange('tax', e.target.value)}
                   className="w-20 text-right border-0 bg-gray-100"
                 />
-                <span className="text-sm text-gray-600">%</span>
+                <span className="text-sm text-gray-600">RON</span>
               </div>
             </div>
           </Card>
 
           <Card className="p-4 bg-white border-0">
             <div className="flex justify-between items-center">
-              <span className="font-medium text-glovo-dark">Glovo fee %</span>
+              <span className="font-medium text-glovo-dark">Wolt fee %</span>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
-                  value={settings.glovoRate}
-                  onChange={(e) => handleInputChange('glovoRate', e.target.value)}
+                  value={settings.woltRate}
+                  onChange={(e) => handleInputChange('woltRate', e.target.value)}
                   className="w-20 text-right border-0 bg-gray-100"
                 />
                 <span className="text-sm text-gray-600">%</span>

@@ -7,9 +7,9 @@ const NavigationBar = () => {
 
   const navItems = [
     { icon: Home, label: "Home", path: "/" },
-    { icon: BarChart3, label: "Rovwe", path: "/weekly-summary" },
+    { icon: BarChart3, label: "Summary", path: "/weekly-summary" },
     { icon: Settings, label: "Admin", path: "/admin" },
-    { icon: DollarSign, label: "Settings", path: "/currency" },
+    { icon: DollarSign, label: "Currency", path: "/currency" },
   ];
 
   return (
